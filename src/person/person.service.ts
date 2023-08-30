@@ -2,29 +2,33 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreatePersonDto } from './dtos/create-person.dto';
 import { Person } from './interfaces/person.interface';
 import { v4 as uuidv4 } from 'uuid';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { UpdatePersonDto } from './dtos/update-person.dto';
 
 @Injectable()
 export class PersonService {
 
     private readonly logger = new Logger(PersonService.name)
     private persons : Person[] = []
+    constructor(@InjectModel('Persons') private readonly personModel: Model<Person>) {}
 
     async createPerson(createPerson : CreatePersonDto):Promise<void>
     {
-        this.logger.log(`createPersonDto ${createPerson}`)
-        await this.create(createPerson);
-        
-        this.persons.forEach((value : Person, index: number) => {
-            this.logger.log(`person ${index} ${value.lastName}, ${value.firstName}`)
-            })  
+        await this.create(createPerson); 
+    }
+
+    async updatePerson(updatePerson : UpdatePersonDto):Promise<void>
+    {
+        await this.update(updatePerson); 
     }
 
     async getAllPersons():Promise<Person[]>{
-        return await this.persons;
+        return await this.personModel.find().exec();
     }
 
     async getById(id:string):Promise<Person>{ 
-        const person = await this.persons.find((person:Person) => person.lastName === id);
+        const person = await this.personModel.findById(id).exec();
         if(!person){
             throw new NotFoundException("Person not found")
         }
@@ -33,14 +37,12 @@ export class PersonService {
 
     private create(personDto : CreatePersonDto) :void
     {
-        const {firstName, lastName} = personDto
+        const newPerson = new this.personModel(personDto)
+        newPerson.save()
+    }
 
-        const person : Person = {
-            _id : uuidv4(),
-            firstName,
-            lastName
-        };
-
-        this.persons.push(person);
+    private async update(personDto : UpdatePersonDto) 
+    {
+        await this.personModel.findOneAndUpdate({_id: personDto._id}, {$set:personDto}).exec()
     }
 }

@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { MongooseModule } from '@nestjs/mongoose';
 import { PersonModule } from './person/person.module';
 
 @Module({
-  imports: [PersonModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    MongooseModule.forRoot('mongodb://localhost:27017/api-garnica-nest-study'),
+    PersonModule
+  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

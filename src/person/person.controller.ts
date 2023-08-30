@@ -1,7 +1,8 @@
-import { Body, Controller, Post, Get, Query, Logger } from '@nestjs/common';
+import { Body, Controller, Post, Get, Query, Logger, Put } from '@nestjs/common';
 import { CreatePersonDto } from './dtos/create-person.dto';
 import { PersonService } from './person.service';
 import { Person } from './interfaces/person.interface';
+import { UpdatePersonDto } from './dtos/update-person.dto';
 
 @Controller('api/v1/person')
 export class PersonController {
@@ -26,5 +27,11 @@ export class PersonController {
     {
         return await this._personService.getById(id);
     }
+
+    @Put()
+    async updatePerson(
+        @Body() createPerson: UpdatePersonDto) {
+        await this._personService.updatePerson(createPerson);
+    };
     
 }
