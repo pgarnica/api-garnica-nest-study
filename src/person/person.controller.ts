@@ -1,8 +1,9 @@
 import { Body, Controller, Post, Get, Query, Logger, Put } from '@nestjs/common';
 import { CreatePersonDto } from './dtos/create-person.dto';
 import { PersonService } from './person.service';
-import { Person } from './interfaces/person.interface';
 import { UpdatePersonDto } from './dtos/update-person.dto';
+import { Person } from 'src/typeorm';
+
 
 @Controller('api/v1/person')
 export class PersonController {

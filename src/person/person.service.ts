@@ -1,17 +1,18 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreatePersonDto } from './dtos/create-person.dto';
-import { Person } from './interfaces/person.interface';
 import { v4 as uuidv4 } from 'uuid';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import { UpdatePersonDto } from './dtos/update-person.dto';
+
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Person } from 'src/typeorm';
 
 @Injectable()
 export class PersonService {
 
     private readonly logger = new Logger(PersonService.name)
     private persons : Person[] = []
-    constructor(@InjectModel('Persons') private readonly personModel: Model<Person>) {}
+    constructor(@InjectRepository(Person) private readonly personRepository: Repository<Person>) {}
 
     async createPerson(createPerson : CreatePersonDto):Promise<void>
     {
@@ -24,11 +25,11 @@ export class PersonService {
     }
 
     async getAllPersons():Promise<Person[]>{
-        return await this.personModel.find().exec();
+        return await this.personRepository.find();
     }
 
     async getById(id:string):Promise<Person>{ 
-        const person = await this.personModel.findById(id).exec();
+        const person = this.personRepository.findOneBy({id:id});
         if(!person){
             throw new NotFoundException("Person not found")
         }
@@ -37,12 +38,13 @@ export class PersonService {
 
     private create(personDto : CreatePersonDto) :void
     {
-        const newPerson = new this.personModel(personDto)
-        newPerson.save()
+        const newPerson = this.personRepository.create(personDto)
+        this.personRepository.save(newPerson)
     }
 
     private async update(personDto : UpdatePersonDto) 
     {
-        await this.personModel.findOneAndUpdate({_id: personDto._id}, {$set:personDto}).exec()
+        const updatePerson = this.personRepository.create(personDto)
+        this.personRepository.save(updatePerson)
     }
 }
