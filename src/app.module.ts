@@ -3,6 +3,7 @@ import { PersonModule } from './person/person.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import entities from './typeorm';
+import { join } from 'path';
 
 
 @Module({
@@ -18,9 +19,9 @@ import entities from './typeorm';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         schema:configService.get('DB_SCHEMA'),
-        migrations: ["src/migrations/*{.ts,.js}"],
+        migrations: ["src/migrations/*{.js}"],
         migrationsTableName: "migrations",
-        entities: entities,
+        entities: [join(__dirname, '**', '*.entity.{ts,js}')]
       }),
       inject: [ConfigService],
     }),
