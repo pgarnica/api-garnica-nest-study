@@ -1,9 +1,8 @@
-import { Body, Controller, Post, Get, Query, Logger, Put } from '@nestjs/common';
+import { Body, Controller, Post, Get, Query, Logger, Put, Param, NotFoundException } from '@nestjs/common';
 import { CreatePersonDto } from './dtos/create-person.dto';
 import { PersonService } from './person.service';
 import { UpdatePersonDto } from './dtos/update-person.dto';
 import { Person } from 'src/typeorm';
-
 
 @Controller('api/v1/person')
 export class PersonController {
@@ -23,16 +22,17 @@ export class PersonController {
         return await this._personService.getAllPersons();
     }
 
-    @Get("/getbyid")
-    async getById(@Query("id") id:string):Promise<Person>
+
+    @Get("/:id")
+    async getById(@Param("id") id:string):Promise<Person>
     {
-        return await this._personService.getById(id);
+       return await this._personService.getById(id);
     }
 
     @Put()
     async updatePerson(
-        @Body() createPerson: UpdatePersonDto) {
-        await this._personService.updatePerson(createPerson);
+        @Body() updatePerson: UpdatePersonDto) {
+        await this._personService.updatePerson(updatePerson);
     };
     
 }

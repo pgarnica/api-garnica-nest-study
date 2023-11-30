@@ -5,7 +5,7 @@ import { UpdatePersonDto } from './dtos/update-person.dto';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Person } from 'src/typeorm';
+import { Person } from '../../src/typeorm/';
 
 @Injectable()
 export class PersonService {
@@ -29,10 +29,12 @@ export class PersonService {
     }
 
     async getById(id:string):Promise<Person>{ 
-        const person = this.personRepository.findOneBy({id:id});
-        if(!person){
-            throw new NotFoundException("Person not found")
+        const person = await this.personRepository.findOneBy({id:id});
+
+        if (person === undefined || person === null ) {
+            throw new NotFoundException('Person not found');
         }
+
         return person;
     }
 
@@ -42,9 +44,12 @@ export class PersonService {
         this.personRepository.save(newPerson)
     }
 
-    private async update(personDto : UpdatePersonDto) 
+    private async update(personDto : UpdatePersonDto) : Promise<void>
     {
-        const updatePerson = this.personRepository.create(personDto)
-        this.personRepository.save(updatePerson)
+        const person = await this.personRepository.findOneBy({id:personDto.id})
+        if(!person){
+            throw new NotFoundException("Person not found")
+        }
+         this.personRepository.update(personDto.id,personDto)
     }
 }
